@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "spotify",
-    "slug": "spotify",
+    "name": "musicaly",
+    "slug": "musicaly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

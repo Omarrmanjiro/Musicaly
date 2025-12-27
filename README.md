@@ -14,37 +14,181 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
    ```bash
    npx expo start
-   ```
+-------------------------------------------------------------------------------
+# 🎵 Musicaly — Music Streaming App (Expo Router)
 
-In the output, you'll find options to open the app in a
+Musicaly is a mobile music streaming app built with **Expo (React Native)** using the **modern Expo Router architecture**.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+We use:
+- Deezer API → music & previews
+- Firebase → authentication
+- Expo Router → navigation (file-based)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## ⚙️ PROJECT SETUP (FOR EVERY TEAM MEMBER)
 
-When you're ready, run:
-
+### 1️⃣ Clone the repository
 ```bash
-npm run reset-project
-```
+git clone https://github.com/Omarrmanjiro/Musicaly.git
+cd musicaly
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-## Learn more
+2️⃣ Install dependencies
+npm install
 
-To learn more about developing your project with Expo, look at the following resources:
+Create .env file (DO NOT COMMIT)//if needed not rn
+EXPO_PUBLIC_DEEZER_API=https://api.deezer.com
+EXPO_PUBLIC_FIREBASE_API_KEY=xxxx
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=xxxx
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=xxxx
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+4️⃣ Run the project
+npx expo start
 
-## Join the community
+ 5 project structure
 
-Join our community of developers creating universal apps.
+musicaly/
+│
+├── app/                 # UI & ROUTES ONLY
+│   ├── (auth)/
+│   ├── (tabs)/
+│   ├── modal.js
+│   └── _layout.js
+│
+├── src/                 # LOGIC ONLY (NO ROUTES)
+│   ├── components/
+│   ├── context/
+│   ├── services/
+│   ├── storage/
+│   └── styles/
+│
+├── .env                 # NOT PUSHED
+├── app.json
+└── README.md
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+
+###############################################################################
+👥 TEAM ROLES & RESPONSIBILITIES
+👤 MEMBER 1 — REGISTER & LOGIN
+🎯 Responsibility
+
+User authentication (Firebase)
+
+✅ Tasks
+
+Login screen
+
+Register screen
+
+Handle auth state
+
+Redirect after login
+
+📂 Files you CAN touch
+app/(auth)/login.js
+app/(auth)/register.js
+src/context/AuthContext.js
+src/services/firebaseAuth.js
+src/storage/userStorage.js
+
+
+
+
+
+👤 MEMBER 2 — MAIN PAGE & SEARCH
+🎯 Responsibility
+
+Home screen + music search
+
+✅ Tasks
+
+Home page UI
+
+Search music via Deezer
+
+Display results
+
+Select track
+
+📂 Files you CAN touch
+app/(tabs)/index.js
+app/(tabs)/explore.js
+src/services/deezer.js
+src/context/MusicContext.js
+
+
+👤 MEMBER 3 — MUSIC PLAYER & PROFILE
+🎯 Responsibility
+
+Play music + user profile
+
+✅ Tasks
+
+Play / pause preview
+
+Handle audio lifecycle
+
+Profile screen UI
+
+Display user info
+
+📂 Files you CAN touch
+app/modal.js
+app/(tabs)/profile.js
+src/services/audio.js
+
+
+
+MEMBER 4 — PAYMENT SIMULATION & PLAYLIST
+🎯 Responsibility
+
+Premium simulation + custom playlists
+
+✅ Tasks
+
+Payment UI (fake / simulated)
+
+Create playlist UI
+
+Save playlist locally
+
+Load saved playlists
+
+📂 Files you CAN touch
+app/(tabs)/payment.js
+app/(tabs)/playlist.js
+src/storage/playlistStorage.js
+
+
+
+do not touchhhhhh
+(GLOBAL CONFIG) 
+Handles:
+
+Firebase config
+
+Deezer API config
+
+.env values
+
+Global routing
+
+Context providers
+
+Final merge to main
+
+🚫 Team members must NOT change global config.
+
+
+##############################################################
+🌿 GIT WORKFLOW
+exampleee:::
+Each member creates a branch:
+git checkout -b feature/login
+
+Commit & push:
+git add .
+git commit -m "feat: login screen"
+git push origin feature/login
