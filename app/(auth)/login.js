@@ -1,5 +1,10 @@
-import LoginScreen from "../../src/screens/LoginScreen";
+import { View, Text } from 'react-native';
+import React from 'react';
 
 export default function Login() {
-  return <LoginScreen />;
+    return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text>Login Screen (Under Construction)</Text>
+        </View>
+    );
 }
