@@ -1,112 +1,137 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { searchAll } from '../../src/services/deezer';
+import { useMusic } from '../../src/context/MusicContext';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+export default function ExploreScreen() {
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const { setCurrentTrack } = useMusic();
+    const router = useRouter();
 
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
+    const handleLiveSearch = async (text) => {
+        setQuery(text);
+
+        if (text.length > 0) {
+            setLoading(true);
+            const data = await searchAll(text);
+            setResults(data);
+            setLoading(false);
+        } else if (text.length === 0) {
+            setResults(null);
+            setLoading(false);
+        }
+    };
+
+    const ResultSection = ({ title, list, type }) => {
+        if (!list || list.length === 0) return null; // Don't show empty sections
+
+        return (
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>{title}</Text>
+                <FlatList
+                    data={list}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            style={styles.card}
+                            onPress={() => {
+                                if (type === 'track') {
+                                    setCurrentTrack(item);
+                                } else {
+                                    // We use the 'type' prop passed to ResultSection ('artist', 'album', etc.)
+                                    router.push(`/details/${type}/${item.id}`);
+                                }
+                            }}
+                        >
+                            <Image
+                                source={{ uri: item.cover_medium || item.picture_medium || item.album?.cover_medium }}
+                                style={type === 'artist' ? styles.artistImage : styles.albumImage}
+                            />
+                            <Text style={styles.cardTitle} numberOfLines={1}>{item.title || item.name}</Text>
+                            {type !== 'artist' && (
+                                <Text style={styles.cardSubtitle} numberOfLines={1}>
+                                    {item.artist ? item.artist.name : 'Album'}
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    )}
+                />
+            </View>
+        );
+    };
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.header}>Search 🔍</Text>
+
+            <View style={styles.searchBox}>
+                <Ionicons name="search" size={20} color="gray" style={{marginRight: 10}} />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Artists, Songs, or Albums..."
+                    placeholderTextColor="gray"
+                    value={query}
+                    onChangeText={handleLiveSearch}
+                />
+                {query.length > 0 && (
+                    <TouchableOpacity onPress={() => handleLiveSearch('')}>
+                        <Ionicons name="close-circle" size={20} color="gray" />
+                    </TouchableOpacity>
+                )}
+            </View>
+
+            {loading ? (
+                <ActivityIndicator size="large" color="#1DB954" style={{marginTop: 50}} />
+            ) : (
+                // We use ScrollView because we have multiple horizontal lists stacked
+                <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+                    {results ? (
+                        <>
+                            <ResultSection title="Songs 🎵" list={results.tracks} type="track" />
+                            <ResultSection title="Artists 🎤" list={results.artists} type="artist" />
+                            <ResultSection title="Albums 💿" list={results.albums} type="album" />
+
+                            {/* message if nothing found */}
+                            {results.tracks.length === 0 && results.artists.length === 0 && (
+                                <Text style={{color:'gray', textAlign:'center', marginTop: 20}}>No results found.</Text>
+                            )}
+                        </>
+                    ) : (
+                        // Placeholder when not searching
+                        <View style={{alignItems:'center', marginTop: 50, opacity: 0.5}}>
+                            <Ionicons name="musical-notes" size={50} color="gray" />
+                            <Text style={{color:'gray', marginTop:10}}>Start typing to search...</Text>
+                        </View>
+                    )}
+                </ScrollView>
+            )}
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
+    container: { flex: 1, backgroundColor: '#121212', paddingTop: 50, paddingHorizontal: 20 },
+    header: { fontSize: 28, fontWeight: 'bold', color: 'white', marginBottom: 20 },
+
+    searchBox: {
+        flexDirection: 'row', alignItems: 'center', backgroundColor: '#333',
+        borderRadius: 10, paddingHorizontal: 15, height: 50, marginBottom: 20
+    },
+    input: { flex: 1, color: 'white', fontSize: 16 },
+
+    sectionContainer: { marginBottom: 30 },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: 'white', marginBottom: 15 },
+
+    card: { marginRight: 15, width: 120 },
+    albumImage: { width: 120, height: 120, borderRadius: 10, marginBottom: 10 },
+    artistImage: { width: 120, height: 120, borderRadius: 60, marginBottom: 10 }, // Circular for artists
+
+    cardTitle: { color: 'white', fontWeight: 'bold', fontSize: 14 },
+    cardSubtitle: { color: 'gray', fontSize: 12 }
 });
