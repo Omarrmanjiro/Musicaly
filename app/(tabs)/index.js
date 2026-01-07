@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ScrollView, 
 import React, { useEffect, useState } from 'react';
 import { getChart } from '../../src/services/deezer';
 import { useMusic } from '../../src/context/MusicContext';
-import { useNavigation } from 'expo-router'; // <--- Kept this
-import { DrawerActions } from '@react-navigation/native'; // <--- Kept this
+import { useNavigation } from 'expo-router'; 
+import { DrawerActions } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
@@ -12,7 +12,7 @@ export default function HomeScreen() {
     const { setCurrentTrack } = useMusic();
     const router = useRouter();
 
-    // 1. ADD THIS: Initialize navigation so the button works
+    
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function HomeScreen() {
         loadData();
     }, []);
 
-    // 1. REUSABLE COMPONENT: A Single Horizontal Section
+  
     const Section = ({ title, list }) => (
         <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>{title}</Text>
