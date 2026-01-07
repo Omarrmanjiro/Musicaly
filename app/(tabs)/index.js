@@ -7,7 +7,7 @@ export default function Home() {
   const [track, setTrack] = useState(null);
 
   async function search() {
-    const results = await searchTracks("eminem");
+    const results = await searchTracks("ElgrandeTOTO");
     setTrack(results[0]);
   }
 

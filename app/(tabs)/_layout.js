@@ -29,7 +29,24 @@ export default function TabLayout() {
           title: 'Explore',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
+
       />
+      <Tabs.Screen
+        name='PlaylistManager'
+        options={{
+          title: 'Playlist',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="play.square.stack.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name='payment'
+        options={{
+          title: 'Premium',
+          tabBarIcon : ({ color }) => <IconSymbol size={28} name="diamond.fill" color="#FFD700" />
+        }}
+      />
+
+
     </Tabs>
   );
 }
