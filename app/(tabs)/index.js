@@ -2,7 +2,11 @@ import { View, Text } from "react-native";
 import { useAuth } from "../../src/context/AuthContext";
 
 export default function Home() {
-  const { user, profile } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
 
   if (!user) {
     return <Text>Not logged in</Text>;
@@ -10,9 +14,7 @@ export default function Home() {
 
   return (
     <View>
-      <Text>UID: {user.uid}</Text>
-      <Text>Email: {user.email}</Text>
-      <Text>Username: {profile?.username}</Text>
+      <Text>Welcome {user.email}</Text>
     </View>
   );
 }
