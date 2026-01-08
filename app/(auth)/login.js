@@ -1,5 +1,5 @@
 import { View, Text, Button, StyleSheet } from "react-native";
-import { auth } from "../../src/services/firebase";
+import { auth } from "../../src/config/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,

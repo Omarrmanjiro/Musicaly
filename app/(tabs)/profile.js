@@ -13,10 +13,10 @@ import {
 import { useEffect, useState } from "react"
 import * as ImagePicker from "expo-image-picker"
 
-import { auth, db, storage } from "../../src/services/firebase"
+import { auth, db } from "../../src/config/firebase"
 import { onAuthStateChanged } from "firebase/auth"
 import { doc, getDoc, setDoc } from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
+// import { ref, uploadBytes, getDownloadURL } from "firebase/storage"  // Commented out since storage not available
 
 export default function ProfileScreen() {
   const [user, setUser] = useState(null)
@@ -58,6 +58,10 @@ export default function ProfileScreen() {
   }, [])
 
   const pickImage = async () => {
+    Alert.alert("Storage Not Available", "Image upload functionality is disabled.");
+    // Firebase storage is not available, so we'll skip image selection
+    // Original implementation would have been:
+    /*
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -68,16 +72,13 @@ export default function ProfileScreen() {
     if (!result.canceled) {
       setLocalImage(result.assets[0].uri)
     }
+    */
   }
 
   const uploadImage = async (uri) => {
-    const response = await fetch(uri)
-    const blob = await response.blob()
-
-    const imageRef = ref(storage, `avatars/${user.uid}.jpg`)
-    await uploadBytes(imageRef, blob)
-
-    return await getDownloadURL(imageRef)
+    // Firebase storage is not available, so we'll skip image upload functionality
+    Alert.alert("Storage Not Available", "Image upload functionality is disabled.");
+    return null;
   }
 
   const saveProfile = async () => {
@@ -127,7 +128,7 @@ export default function ProfileScreen() {
               }}
               style={styles.avatar}
             />
-            {editing && <Text style={styles.changeText}>Change photo</Text>}
+            {editing && <Text style={styles.changeText}>Photo upload disabled</Text>}
           </TouchableOpacity>
         </View>
 

@@ -1,26 +1,26 @@
 "use client"
 
 import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native"
-import { usePlayer } from "../../src/context/MockPlayerContext"
+import { useMusic } from "../../src/context/MusicContext"
+import { usePlayer } from "../../src/context/PlayerContext"
 import { LinearGradient } from "expo-linear-gradient"
 import Slider from "@react-native-community/slider"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 
 const { width } = Dimensions.get("window")
 
-const trackColors = {
-  red: { primary: "#E63946", secondary: "#A4161A", light: "#F77F88" },
-  blue: { primary: "#457B9D", secondary: "#1D3557", light: "#A8DADC" },
-  purple: { primary: "#9D4EDD", secondary: "#5A189A", light: "#C77DFF" },
-  orange: { primary: "#F77F00", secondary: "#D62828", light: "#FCBF49" },
-  green: { primary: "#06A77D", secondary: "#004E40", light: "#43C59E" },
-  pink: { primary: "#FF006E", secondary: "#C7184C", light: "#FF69B4" },
-}
+const trackColors = [
+  ["#E63946", "#A4161A"],
+  ["#457B9D", "#1D3557"],
+  ["#9D4EDD", "#5A189A"],
+  ["#F77F00", "#D62828"],
+  ["#06A77D", "#004E40"],
+  ["#FF006E", "#C7184C"],
+]
 
-const getTrackColor = (trackId) => {
-  const colors = Object.values(trackColors)
-  const index = trackId ? trackId.charCodeAt(0) % colors.length : 0
-  return colors[index]
+const getTrackColor = (seed) => {
+  const index = seed ? seed.charCodeAt(0) % trackColors.length : 0
+  return trackColors[index]
 }
 
 export default function PlayerScreen() {
@@ -29,7 +29,6 @@ export default function PlayerScreen() {
     next,
     previous,
     isPlaying,
-    currentTrack,
     progress,
     duration,
     seek,
@@ -39,141 +38,126 @@ export default function PlayerScreen() {
     repeatMode,
   } = usePlayer()
 
+  const { currentTrack } = useMusic()
+
   const [isSeeking, setIsSeeking] = useState(false)
   const [seekPosition, setSeekPosition] = useState(0)
-  const [isLiked, setIsLiked] = useState(false)
 
   useEffect(() => {
-    if (!isSeeking) {
-      setSeekPosition(progress)
-    }
+    if (!isSeeking) setSeekPosition(progress || 0)
   }, [progress, isSeeking])
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, "0")}`
-  }
+  const formatTime = (s = 0) =>
+    `${Math.floor(s / 60)}:${Math.floor(s % 60)
+      .toString()
+      .padStart(2, "0")}`
 
-  const handleSeekStart = () => {
-    setIsSeeking(true)
-  }
+  const track = currentTrack
+    ? {
+        title: currentTrack.title || "Unknown Title",
+        artist: currentTrack.artist?.name || "Unknown Artist",
+        artwork: currentTrack.album?.cover_big || currentTrack.artist?.picture_big || null,
+        playlist: "Now Playing",
+      }
+    : {
+        title: "No Track Playing",
+        artist: "—",
+        artwork: null,
+        playlist: "—",
+      }
 
-  const handleSeekChange = (value) => {
-    setSeekPosition(value)
-  }
-
-  const handleSeekComplete = (value) => {
-    setIsSeeking(false)
-    seek?.(value)
-  }
-
-  const track = currentTrack || {
-    title: "No Track Playing",
-    artist: "Unknown Artist",
-    album: "Unknown Album",
-    artwork: null,
-    playlist: "Liked Songs",
-  }
-
-  const currentColor = getTrackColor(track.title)
+  const [primary, secondary] = getTrackColor(track.title)
 
   return (
-    <LinearGradient colors={[currentColor.primary, currentColor.secondary]} style={styles.container}>
+    <LinearGradient colors={[primary, secondary]} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton}>
-          <Text style={styles.headerIcon}>−</Text>
-        </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerSubtitle}>NOW PLAYING</Text>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {track.playlist || "Liked Songs"}
-          </Text>
+          <Text style={styles.headerSubtitle}>PLAYING FROM PLAYLIST</Text>
+          <Text style={styles.headerTitle}>{track.playlist}</Text>
         </View>
-        <TouchableOpacity style={styles.headerButton}>
-          <Text style={styles.headerIcon}>⋮</Text>
-        </TouchableOpacity>
       </View>
 
-      {/* Album Artwork */}
+      {/* Artwork */}
       <View style={styles.artworkContainer}>
         {track.artwork ? (
-          <Image source={{ uri: track.artwork }} style={styles.artwork} resizeMode="cover" />
+          <Image source={{ uri: track.artwork }} style={styles.artwork} />
         ) : (
-          <View style={[styles.artworkPlaceholder, { backgroundColor: currentColor.light }]}>
+          <View style={styles.artworkPlaceholder}>
             <Text style={styles.artworkPlaceholderText}>♪</Text>
           </View>
         )}
       </View>
 
-      {/* Track Info with Like Button */}
+      {/* Track Info */}
       <View style={styles.trackInfo}>
         <View style={styles.trackTitleRow}>
           <View style={styles.trackTextContainer}>
-            <Text style={styles.trackTitle} numberOfLines={2}>
+            <Text style={styles.trackTitle} numberOfLines={1}>
               {track.title}
             </Text>
-            <Text style={styles.trackArtist} numberOfLines={1}>
-              {track.artist}
-            </Text>
+            <Text style={styles.trackArtist}>{track.artist}</Text>
           </View>
-          <TouchableOpacity style={styles.heartButton} onPress={() => setIsLiked(!isLiked)}>
-            <Text style={[styles.heartIcon, isLiked && styles.heartIconLiked]}>{isLiked ? "♥" : "♡"}</Text>
+          <TouchableOpacity style={styles.heartButton}>
+            <Text style={styles.heartIcon}>♡</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Progress Bar */}
+      {/* Progress */}
       <View style={styles.progressContainer}>
         <Slider
           style={styles.slider}
           minimumValue={0}
-          maximumValue={duration || 100}
+          maximumValue={duration || 1}
           value={seekPosition}
-          onSlidingStart={handleSeekStart}
-          onValueChange={handleSeekChange}
-          onSlidingComplete={handleSeekComplete}
-          minimumTrackTintColor="#FFFFFF"
+          onSlidingStart={() => setIsSeeking(true)}
+          onSlidingComplete={(v) => {
+            setIsSeeking(false)
+            seek(v)
+          }}
+          minimumTrackTintColor="#fff"
           maximumTrackTintColor="rgba(255,255,255,0.3)"
-          thumbTintColor="#FFFFFF"
+          thumbTintColor="#fff"
         />
         <View style={styles.timeContainer}>
           <Text style={styles.timeText}>{formatTime(seekPosition)}</Text>
-          <Text style={styles.timeText}>{formatTime(duration || 0)}</Text>
+          <Text style={styles.timeText}>{formatTime(duration)}</Text>
         </View>
       </View>
 
       {/* Controls */}
       <View style={styles.controls}>
-        <TouchableOpacity onPress={toggleShuffle} style={styles.controlIconContainer}>
-          <Text style={[styles.controlIcon, isShuffle && styles.activeControl]}>↻</Text>
+        <TouchableOpacity style={styles.controlButton} onPress={toggleShuffle}>
+          <Text style={[styles.controlIcon, isShuffle && styles.activeControl]}>⤮</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={previous} style={styles.controlButton}>
+        <TouchableOpacity style={styles.controlButton} onPress={previous}>
           <Text style={styles.controlIconLarge}>⏮</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={togglePlay} style={styles.playButton}>
-          <Text style={styles.playIcon}>{isPlaying ? "∥" : "▶"}</Text>
+        <TouchableOpacity style={styles.playButton} onPress={togglePlay}>
+          <Text style={styles.playIcon}>{isPlaying ? "❚❚" : "▶"}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={next} style={styles.controlButton}>
+        <TouchableOpacity style={styles.controlButton} onPress={next}>
           <Text style={styles.controlIconLarge}>⏭</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={toggleRepeat} style={styles.controlIconContainer}>
-          <Text style={[styles.controlIcon, repeatMode !== "off" && styles.activeControl]}>↻</Text>
+        <TouchableOpacity style={styles.controlButton} onPress={toggleRepeat}>
+          <Text style={[styles.controlIcon, repeatMode !== "off" && styles.activeControl]}>
+            {repeatMode === "off" ? "↻" : repeatMode === "one" ? "1↻" : "∞"}
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>
         <TouchableOpacity style={styles.bottomButton}>
-          <Text style={styles.bottomActionIcon}>≈</Text>
+          <Text style={styles.bottomActionIcon}>🔊</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomButton}>
-          <Text style={styles.bottomActionIcon}>⤴</Text>
+          <Text style={styles.bottomActionIcon}>📃</Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>
@@ -189,23 +173,12 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     marginBottom: 32,
   },
-  headerButton: {
-    padding: 8,
-  },
-  headerIcon: {
-    fontSize: 24,
-    color: "#fff",
-    fontWeight: "300",
-    letterSpacing: 1,
-  },
   headerCenter: {
     alignItems: "center",
-    flex: 1,
-    marginHorizontal: 16,
   },
   headerSubtitle: {
     fontSize: 11,
@@ -239,6 +212,7 @@ const styles = StyleSheet.create({
     width: width - 80,
     height: width - 80,
     borderRadius: 16,
+    backgroundColor: "rgba(0,0,0,0.2)",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -280,11 +254,8 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   heartIcon: {
-    fontSize: 32,
+    fontSize: 28,
     color: "#fff",
-  },
-  heartIconLiked: {
-    color: "#FFD700",
   },
   progressContainer: {
     marginBottom: 24,
@@ -297,6 +268,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 4,
+    marginTop: -8,
   },
   timeText: {
     fontSize: 12,
@@ -307,13 +279,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 24,
     paddingHorizontal: 8,
   },
   controlButton: {
-    padding: 12,
-  },
-  controlIconContainer: {
     padding: 12,
   },
   controlIcon: {
@@ -342,15 +311,15 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   playIcon: {
-    fontSize: 28,
+    fontSize: 24,
     color: "#000",
     fontWeight: "600",
-    marginLeft: 2,
   },
   bottomActions: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingBottom: 32,
+    paddingHorizontal: 16,
   },
   bottomButton: {
     padding: 8,
@@ -358,6 +327,5 @@ const styles = StyleSheet.create({
   bottomActionIcon: {
     fontSize: 20,
     color: "rgba(255,255,255,0.6)",
-    fontWeight: "300",
   },
 })
