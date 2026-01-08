@@ -1,21 +1,20 @@
+import { useEffect, useState } from "react"
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  SafeAreaView,
-  TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Image,
+  SafeAreaView,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native"
-import { useEffect, useState } from "react"
-import * as ImagePicker from "expo-image-picker"
 
-import { auth, db } from "../../src/config/firebase"
 import { onAuthStateChanged } from "firebase/auth"
 import { doc, getDoc, setDoc } from "firebase/firestore"
+import { auth, db } from "../../src/config/firebase"
 // import { ref, uploadBytes, getDownloadURL } from "firebase/storage"  // Commented out since storage not available
 
 export default function ProfileScreen() {
@@ -49,6 +48,21 @@ export default function ProfileScreen() {
         setBio(data.bio || "")
         setPhone(data.phone || "")
         setPhotoURL(data.photoURL || null)
+      } else {
+        // SELF-HEALING: If doc doesn't exist (e.g. registration race condition), create it now
+        console.log("Profile missing, creating default...");
+        const defaultData = {
+          displayName: "Music Lover",
+          email: u.email,
+          createdAt: new Date().toISOString(),
+          photoURL: null,
+          bio: "Ready to rock! 🎸",
+          phone: ""
+        };
+        await setDoc(refDoc, defaultData);
+        setName(defaultData.displayName);
+        setBio(defaultData.bio);
+        setPhone(defaultData.phone);
       }
 
       setLoading(false)
@@ -124,7 +138,7 @@ export default function ProfileScreen() {
               source={{
                 uri:
                   localImage ||
-                  photoURL 
+                  photoURL
               }}
               style={styles.avatar}
             />
