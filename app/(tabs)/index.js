@@ -1,78 +1,93 @@
-import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+    StyleSheet,
+    Text,
+    View,
+    FlatList,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    ActivityIndicator
+} from 'react-native';
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import { getChart } from '../../src/services/deezer';
 import { useMusic } from '../../src/context/MusicContext';
 import { usePlayer } from '../../src/context/PlayerContext';
-import { useNavigation } from 'expo-router'; 
+import { useNavigation, useRouter } from 'expo-router';
 import { DrawerActions } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
+
+/* ✅ MEMOIZED SECTION (VERY IMPORTANT) */
+const Section = memo(({ title, list, onPress }) => (
+    <View style={styles.sectionContainer}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <FlatList
+            data={list}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => onPress(item)}
+                >
+                    <Image
+                        source={{
+                            uri:
+                                item.cover_medium ||
+                                item.picture_medium ||
+                                item.album?.cover_medium
+                        }}
+                        style={styles.cover}
+                    />
+                    <Text style={styles.cardTitle} numberOfLines={1}>
+                        {item.title}
+                    </Text>
+                    <Text style={styles.cardSubtitle} numberOfLines={1}>
+                        {item.artist?.name || item.user?.name}
+                    </Text>
+                </TouchableOpacity>
+            )}
+        />
+    </View>
+));
 
 export default function HomeScreen() {
     const [data, setData] = useState({ tracks: [], albums: [], playlists: [] });
     const [loading, setLoading] = useState(true);
-    const { setCurrentTrack } = useMusic();
-    const { playTrack } = usePlayer();
-    const router = useRouter();
 
-    
+    const { playTrack } = usePlayer();      // action only
+
+    const router = useRouter();
     const navigation = useNavigation();
 
     useEffect(() => {
-        async function loadData() {
+        (async () => {
             const chartData = await getChart();
             setData(chartData);
             setLoading(false);
-        }
-        loadData();
+        })();
     }, []);
 
-  
-    const Section = ({ title, list }) => (
-        <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>{title}</Text>
-            <FlatList
-                data={list}
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        style={styles.card}
-                        onPress={() => {
-                            if (item.type === 'track') {
-                                // If it's a song, play it
-                                setCurrentTrack(item);
-                                // Also trigger playback through player context
-                                playTrack(item);
-                            } else {
-                                // If it's an album/playlist, go to the detail page
-                                // We use router.push with the folder structure we made
-                                // e.g. /details/album/94384
-                                router.push(`/details/${item.type}/${item.id}`);
-                            }
-                        }}
-                    >
-                        <Image
-                            source={{ uri: item.cover_medium || item.picture_medium || item.album.cover_medium }}
-                            style={styles.cover}
-                        />
-                        <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
-                        <Text style={styles.cardSubtitle} numberOfLines={1}>
-                            {item.artist ? item.artist.name : item.user.name}
-                        </Text>
-                    </TouchableOpacity>
-                )}
-            />
-        </View>
-    );
+    /* ✅ MEMOIZED PRESS HANDLER */
+    const handlePress = useCallback((item) => {
+        if (item.type === 'track') {
+            playTrack(item);
+        } else {
+            router.push(`/details/${item.type}/${item.id}`);
+        }
+    }, []);
 
-    if (loading) return <ActivityIndicator size="large" style={{marginTop: 50}} />;
+    if (loading) {
+        return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
+    }
 
     return (
         <ScrollView style={styles.container}>
-            {/* 2. MODIFIED HEADER: Now includes the Avatar Button */}
             <View style={styles.headerContainer}>
-                <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+                <TouchableOpacity
+                    onPress={() =>
+                        navigation.dispatch(DrawerActions.openDrawer())
+                    }
+                >
                     <Image
                         source={{ uri: 'https://i.pravatar.cc/300' }}
                         style={styles.headerAvatar}
@@ -81,12 +96,23 @@ export default function HomeScreen() {
                 <Text style={styles.headerText}>Good Morning ☀️</Text>
             </View>
 
-            {/* 2. STACK THE SECTIONS VERTICALLY (Unchanged) */}
-            <Section title="Top Tracks 🔥" list={data.tracks} />
-            <Section title="Top Albums 💿" list={data.albums} />
-            <Section title="Hot Playlists 🎧" list={data.playlists} />
+            <Section
+                title="Top Tracks 🔥"
+                list={data.tracks}
+                onPress={handlePress}
+            />
+            <Section
+                title="Top Albums 💿"
+                list={data.albums}
+                onPress={handlePress}
+            />
+            <Section
+                title="Hot Playlists 🎧"
+                list={data.playlists}
+                onPress={handlePress}
+            />
 
-            <View style={{height: 100}} />
+            <View style={{ height: 100 }} />
         </ScrollView>
     );
 }
@@ -94,7 +120,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#121212', paddingTop: 50 },
 
-    // 3. NEW HEADER STYLES (Replaces the old 'header' style)
     headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -114,7 +139,13 @@ const styles = StyleSheet.create({
     },
 
     sectionContainer: { marginBottom: 30 },
-    sectionTitle: { fontSize: 20, fontWeight: 'bold', color: 'white', marginLeft: 20, marginBottom: 15 },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'white',
+        marginLeft: 20,
+        marginBottom: 15
+    },
 
     card: { marginLeft: 20, width: 140 },
     cover: { width: 140, height: 140, borderRadius: 10, marginBottom: 10 },

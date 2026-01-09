@@ -9,6 +9,9 @@ export function PlayerProvider({ children }) {
   const indexRef = useRef(0);
   const repeatRef = useRef("off");
 
+  // 🔴 IMPORTANT: collapsed by default
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const [queue, setQueue] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -17,24 +20,25 @@ export function PlayerProvider({ children }) {
   const [isShuffle, setIsShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState("off"); // off | one | all
 
-  // Sync refs with state
+  /* ---------------- SYNC REFS ---------------- */
   useEffect(() => {
     queueRef.current = queue;
     indexRef.current = currentIndex;
     repeatRef.current = repeatMode;
   }, [queue, currentIndex, repeatMode]);
 
-  // Cleanup on unmount
+  /* ---------------- CLEANUP ---------------- */
   useEffect(() => {
     return () => {
       soundRef.current?.unloadAsync();
     };
   }, []);
 
+  /* ---------------- PLAY TRACK ---------------- */
   async function playTrack(track, newQueue = []) {
     if (!track?.preview) return;
 
-    // Stop previous
+    // Stop previous sound
     if (soundRef.current) {
       await soundRef.current.unloadAsync();
       soundRef.current = null;
@@ -44,6 +48,10 @@ export function PlayerProvider({ children }) {
       setQueue(newQueue);
       const idx = newQueue.findIndex(t => t.id === track.id);
       setCurrentIndex(idx >= 0 ? idx : 0);
+    } else {
+      // ✅ FIX: If no queue provided, just play this song alone
+      setQueue([track]);
+      setCurrentIndex(0);
     }
 
     const { sound } = await Audio.Sound.createAsync(
@@ -53,6 +61,9 @@ export function PlayerProvider({ children }) {
 
     soundRef.current = sound;
     setIsPlaying(true);
+
+    // ⭐ THIS IS THE KEY FIX
+    setIsExpanded(true); // open full player ONLY when user plays
 
     sound.setOnPlaybackStatusUpdate(status => {
       if (!status.isLoaded) return;
@@ -67,6 +78,7 @@ export function PlayerProvider({ children }) {
     });
   }
 
+  /* ---------------- TRACK END ---------------- */
   function handleEnd() {
     const queue = queueRef.current;
     const index = indexRef.current;
@@ -90,6 +102,7 @@ export function PlayerProvider({ children }) {
     }
   }
 
+  /* ---------------- CONTROLS ---------------- */
   async function togglePlay() {
     if (!soundRef.current) return;
 
@@ -111,7 +124,9 @@ export function PlayerProvider({ children }) {
   }
 
   function toggleRepeat() {
-    setRepeatMode(r => (r === "off" ? "one" : r === "one" ? "all" : "off"));
+    setRepeatMode(r =>
+      r === "off" ? "one" : r === "one" ? "all" : "off"
+    );
   }
 
   async function next() {
@@ -138,18 +153,24 @@ export function PlayerProvider({ children }) {
   return (
     <PlayerContext.Provider
       value={{
+        isExpanded,
+        setIsExpanded,
+
         playTrack,
         togglePlay,
         next,
         previous,
+
         isPlaying,
         progress,
         duration,
         seek,
+
         toggleShuffle,
         toggleRepeat,
         isShuffle,
         repeatMode,
+        currentTrack: queue[currentIndex],
       }}
     >
       {children}

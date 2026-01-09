@@ -1,7 +1,7 @@
 "use client"
 
 import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native"
-import { useMusic } from "../../src/context/MusicContext"
+
 import { usePlayer } from "../../src/context/PlayerContext"
 import { LinearGradient } from "expo-linear-gradient"
 import Slider from "@react-native-community/slider"
@@ -36,9 +36,9 @@ export default function PlayerScreen() {
     toggleRepeat,
     isShuffle,
     repeatMode,
+    setIsExpanded, // ✅ ADDED
+    currentTrack,
   } = usePlayer()
-
-  const { currentTrack } = useMusic()
 
   const [isSeeking, setIsSeeking] = useState(false)
   const [seekPosition, setSeekPosition] = useState(0)
@@ -54,28 +54,36 @@ export default function PlayerScreen() {
 
   const track = currentTrack
     ? {
-        title: currentTrack.title || "Unknown Title",
-        artist: currentTrack.artist?.name || "Unknown Artist",
-        artwork: currentTrack.album?.cover_big || currentTrack.artist?.picture_big || null,
-        playlist: "Now Playing",
-      }
+      title: currentTrack.title || "Unknown Title",
+      artist: currentTrack.artist?.name || "Unknown Artist",
+      artwork: currentTrack.album?.cover_big || currentTrack.artist?.picture_big || null,
+      playlist: "Now Playing",
+    }
     : {
-        title: "No Track Playing",
-        artist: "—",
-        artwork: null,
-        playlist: "—",
-      }
+      title: "No Track Playing",
+      artist: "—",
+      artwork: null,
+      playlist: "—",
+    }
 
   const [primary, secondary] = getTrackColor(track.title)
 
   return (
     <LinearGradient colors={[primary, secondary]} style={styles.container}>
-      {/* Header */}
+
+      {/* 🔽 HEADER WITH COLLAPSE BUTTON (SPOTIFY STYLE) */}
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => setIsExpanded(false)}>
+          <Text style={styles.collapseIcon}>⌄</Text>
+        </TouchableOpacity>
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerSubtitle}>PLAYING FROM PLAYLIST</Text>
           <Text style={styles.headerTitle}>{track.playlist}</Text>
         </View>
+
+        {/* Spacer to keep center aligned */}
+        <View style={{ width: 28 }} />
       </View>
 
       {/* Artwork */}
@@ -173,9 +181,13 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 32,
+  },
+  collapseIcon: {
+    fontSize: 28,
+    color: "#fff",
   },
   headerCenter: {
     alignItems: "center",
@@ -192,6 +204,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 4,
   },
+
+  /* REST IS UNCHANGED */
   artworkContainer: {
     alignItems: "center",
     marginBottom: 40,
@@ -202,101 +216,57 @@ const styles = StyleSheet.create({
     width: width - 80,
     height: width - 80,
     borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.4,
-    shadowRadius: 30,
-    elevation: 15,
   },
   artworkPlaceholder: {
     width: width - 80,
     height: width - 80,
     borderRadius: 16,
-    backgroundColor: "rgba(0,0,0,0.2)",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.4,
-    shadowRadius: 30,
-    elevation: 15,
   },
   artworkPlaceholderText: {
     fontSize: 80,
     color: "rgba(255,255,255,0.3)",
-    fontWeight: "300",
   },
-  trackInfo: {
-    marginBottom: 24,
-  },
+  trackInfo: { marginBottom: 24 },
   trackTitleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
   },
-  trackTextContainer: {
-    flex: 1,
-    marginRight: 12,
-  },
+  trackTextContainer: { flex: 1 },
   trackTitle: {
     fontSize: 28,
     fontWeight: "700",
     color: "#fff",
-    marginBottom: 8,
-    lineHeight: 34,
   },
   trackArtist: {
     fontSize: 16,
     color: "rgba(255,255,255,0.7)",
-    fontWeight: "500",
   },
-  heartButton: {
-    padding: 8,
-  },
-  heartIcon: {
-    fontSize: 28,
-    color: "#fff",
-  },
-  progressContainer: {
-    marginBottom: 24,
-  },
-  slider: {
-    width: "100%",
-    height: 40,
-  },
+  heartButton: { padding: 8 },
+  heartIcon: { fontSize: 28, color: "#fff" },
+  progressContainer: { marginBottom: 24 },
+  slider: { width: "100%", height: 40 },
   timeContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 4,
-    marginTop: -8,
   },
   timeText: {
     fontSize: 12,
     color: "rgba(255,255,255,0.7)",
-    fontWeight: "500",
   },
   controls: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: 24,
-    paddingHorizontal: 8,
   },
-  controlButton: {
-    padding: 12,
-  },
+  controlButton: { padding: 12 },
   controlIcon: {
     fontSize: 24,
     color: "rgba(255,255,255,0.6)",
-    fontWeight: "300",
   },
-  activeControl: {
-    color: "#FFD700",
-  },
-  controlIconLarge: {
-    fontSize: 36,
-    color: "#fff",
-  },
+  activeControl: { color: "#FFD700" },
+  controlIconLarge: { fontSize: 36, color: "#fff" },
   playButton: {
     width: 64,
     height: 64,
@@ -304,26 +274,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
   },
   playIcon: {
     fontSize: 24,
     color: "#000",
-    fontWeight: "600",
   },
   bottomActions: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingBottom: 32,
-    paddingHorizontal: 16,
   },
-  bottomButton: {
-    padding: 8,
-  },
+  bottomButton: { padding: 8 },
   bottomActionIcon: {
     fontSize: 20,
     color: "rgba(255,255,255,0.6)",

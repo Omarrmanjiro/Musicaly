@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View, TextInput, FlatList, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { searchAll } from '../../src/services/deezer';
-import { useMusic } from '../../src/context/MusicContext';
+
+import { usePlayer } from '../../src/context/PlayerContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -9,7 +10,8 @@ export default function ExploreScreen() {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState(null);
     const [loading, setLoading] = useState(false);
-    const { setCurrentTrack } = useMusic();
+
+    const { playTrack } = usePlayer();
     const router = useRouter();
 
     const handleLiveSearch = async (text) => {
@@ -42,7 +44,7 @@ export default function ExploreScreen() {
                             style={styles.card}
                             onPress={() => {
                                 if (type === 'track') {
-                                    setCurrentTrack(item);
+                                    playTrack(item);
                                 } else {
                                     // We use the 'type' prop passed to ResultSection ('artist', 'album', etc.)
                                     router.push(`/details/${type}/${item.id}`);
@@ -71,7 +73,7 @@ export default function ExploreScreen() {
             <Text style={styles.header}>Search 🔍</Text>
 
             <View style={styles.searchBox}>
-                <Ionicons name="search" size={20} color="gray" style={{marginRight: 10}} />
+                <Ionicons name="search" size={20} color="gray" style={{ marginRight: 10 }} />
                 <TextInput
                     style={styles.input}
                     placeholder="Artists, Songs, or Albums..."
@@ -87,7 +89,7 @@ export default function ExploreScreen() {
             </View>
 
             {loading ? (
-                <ActivityIndicator size="large" color="#1DB954" style={{marginTop: 50}} />
+                <ActivityIndicator size="large" color="#1DB954" style={{ marginTop: 50 }} />
             ) : (
                 // We use ScrollView because we have multiple horizontal lists stacked
                 <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
@@ -99,14 +101,14 @@ export default function ExploreScreen() {
 
                             {/* message if nothing found */}
                             {results.tracks.length === 0 && results.artists.length === 0 && (
-                                <Text style={{color:'gray', textAlign:'center', marginTop: 20}}>No results found.</Text>
+                                <Text style={{ color: 'gray', textAlign: 'center', marginTop: 20 }}>No results found.</Text>
                             )}
                         </>
                     ) : (
                         // Placeholder when not searching
-                        <View style={{alignItems:'center', marginTop: 50, opacity: 0.5}}>
+                        <View style={{ alignItems: 'center', marginTop: 50, opacity: 0.5 }}>
                             <Ionicons name="musical-notes" size={50} color="gray" />
-                            <Text style={{color:'gray', marginTop:10}}>Start typing to search...</Text>
+                            <Text style={{ color: 'gray', marginTop: 10 }}>Start typing to search...</Text>
                         </View>
                     )}
                 </ScrollView>

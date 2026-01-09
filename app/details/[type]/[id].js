@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, ActivityIndi
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { getCollectionDetails } from '../../../src/services/deezer';
-import { useMusic } from '../../../src/context/MusicContext';
+
 import { usePlayer } from '../../../src/context/PlayerContext';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -10,7 +10,7 @@ export default function DetailScreen() {
     const { type, id } = useLocalSearchParams(); // Reads the URL (e.g., type="album", id="123")
     const [tracks, setTracks] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { setCurrentTrack } = useMusic();
+
     const { playTrack } = usePlayer();
     const router = useRouter();
 
@@ -27,7 +27,7 @@ export default function DetailScreen() {
         <TouchableOpacity
             style={styles.item}
             onPress={() => {
-                setCurrentTrack(item);
+
                 playTrack(item, tracks); // Pass the whole track list as the queue
             }}
         >
@@ -51,13 +51,13 @@ export default function DetailScreen() {
             }} />
 
             {loading ? (
-                <ActivityIndicator size="large" color="#1DB954" style={{marginTop: 50}} />
+                <ActivityIndicator size="large" color="#1DB954" style={{ marginTop: 50 }} />
             ) : (
                 <FlatList
                     data={tracks}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={renderItem}
-                    ListEmptyComponent={<Text style={{color:'gray', textAlign:'center', marginTop:20}}>No tracks found.</Text>}
+                    ListEmptyComponent={<Text style={{ color: 'gray', textAlign: 'center', marginTop: 20 }}>No tracks found.</Text>}
                 />
             )}
         </View>

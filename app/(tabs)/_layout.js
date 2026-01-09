@@ -52,30 +52,37 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-              name='PlaylistManager'
-              options={{
-                title:'Playlists',
-                 tabBarIcon: ({ color, focused }) => (
+                name='PlaylistManager'
+                options={{
+                    title: 'Playlists',
+                    tabBarIcon: ({ color, focused }) => (
                         <Ionicons
                             name={focused ? "musical-notes" : "musical-notes-outline"}
                             size={28}
                             color={color}
                         />
-                 ),
-              }}
+                    ),
+                }}
             />
-             <Tabs.Screen
-              name='payment'
-              options={{
-                title:'Premium',
-                 tabBarIcon: ({ color, focused }) => (
+            <Tabs.Screen
+                name='payment'
+                options={{
+                    title: 'Premium',
+                    tabBarIcon: ({ color, focused }) => (
                         <Ionicons
                             name={focused ? "diamond" : "diamond-outline"}
                             size={28}
                             color={color}
                         />
-                 ),
-              }}
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: 'Profile',
+                    href: null, // This hides it from the bottom tab bar
+                }}
             />
         </Tabs>
     );

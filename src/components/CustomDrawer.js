@@ -13,9 +13,12 @@ export default function CustomDrawer(props) {
         <View style={{ flex: 1, backgroundColor: '#121212' }}>
             <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: insets.top }}>
                 {/* HEADER */}
-                <TouchableOpacity style={styles.header}>
+                <TouchableOpacity
+                    style={styles.header}
+                    onPress={() => router.push('/(tabs)/profile')}
+                >
                     <Image source={{ uri: 'https://i.pravatar.cc/300' }} style={styles.avatar} />
-                    <View style={{marginLeft: 15}}>
+                    <View style={{ marginLeft: 15 }}>
                         <Text style={styles.name}>Ouazzou abdelhamid</Text>
                         <Text style={styles.viewProfile}>Voir le profil</Text>
                     </View>
@@ -26,23 +29,23 @@ export default function CustomDrawer(props) {
                 {/* MENU ITEMS */}
                 <DrawerItem
                     label="Nouveautés"
-                    icon={({color}) => <Ionicons name="flash-outline" size={22} color="white" />}
+                    icon={({ color }) => <Ionicons name="flash-outline" size={22} color="white" />}
                     labelStyle={styles.label}
-                    onPress={() => {}}
+                    onPress={() => { }}
                 />
                 <DrawerItem
                     label="Préférences"
-                    icon={({color}) => <Ionicons name="settings-outline" size={22} color="white" />}
+                    icon={({ color }) => <Ionicons name="settings-outline" size={22} color="white" />}
                     labelStyle={styles.label}
-                    onPress={() => {}}
+                    onPress={() => { }}
                 />
             </DrawerContentScrollView>
 
             {/* LOGOUT */}
             <View style={{ padding: 20, borderTopWidth: 1, borderTopColor: '#333' }}>
-                <TouchableOpacity onPress={() => router.replace('/(auth)/login')} style={{flexDirection: 'row', alignItems: 'center'}}>
+                <TouchableOpacity onPress={() => router.replace('/(auth)/login')} style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="log-out-outline" size={22} color="white" />
-                    <Text style={{color: 'white', marginLeft: 15}}>Se déconnecter</Text>
+                    <Text style={{ color: 'white', marginLeft: 15 }}>Se déconnecter</Text>
                 </TouchableOpacity>
             </View>
         </View>
