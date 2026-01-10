@@ -164,18 +164,27 @@ export default function PlaylistManager() {
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={styles.songItem}
-                        onPress={() => {
-                            // Convert playlist song format to match player expectations
-                            const track = {
-                                id: item.id,
-                                title: item.title,
-                                artist: { name: item.artist },
-                                cover: item.cover,
-                                preview: item.preview || null
-                            };
-                            setCurrentTrack(track);
-                            playTrack(track, selectedPlaylist.songs || []); // Play with playlist as queue
-                        }}
+                       onPress={() => {
+                                if (!item.preview) {
+                                    Alert.alert("Cannot Play", "This song does not have a preview URL.");
+                                    return;
+                                }
+
+                                const artistObj = typeof item.artist === 'string' 
+                                    ? { name: item.artist } 
+                                    : item.artist;
+
+                                const track = {
+                                    id: item.id,
+                                    title: item.title,
+                                    artist: artistObj,
+                                    cover: item.cover,
+                                    preview: item.preview
+                                };
+                                setCurrentTrack(track);
+                               
+                                playTrack(track, selectedPlaylist.songs || []); 
+                            }}
                     >
                         <Image source={{ uri: item.cover }} style={styles.songImage} />
                         <View style={{ flex: 1, marginLeft: 12 }}>
