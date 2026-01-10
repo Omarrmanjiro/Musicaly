@@ -46,7 +46,7 @@ export default function CustomDrawer(props) {
             </DrawerContentScrollView>
 
             {/* LOGOUT */}
-            <View style={{ padding: 20, borderTopWidth: 1, borderTopColor: '#333' }}>
+            <View style={{ padding: 20, borderTopWidth: 1, borderTopColor: '#333', paddingBottom: 20 + insets.bottom }}>
                 <TouchableOpacity onPress={logout} style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="log-out-outline" size={22} color="white" />
                     <Text style={{ color: 'white', marginLeft: 15 }}>Se déconnecter</Text>

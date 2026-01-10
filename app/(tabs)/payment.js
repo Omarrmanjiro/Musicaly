@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { addToPremium } from '../../src/services/premiumUsers';
+import { addToPremium, getPremiumStatus } from '../../src/services/premiumUsers';
+import { useEffect } from 'react';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const PlanCard = ({ title, price, features, color, recommended ,onPress}) => (
+const PlanCard = ({ title, price, features, color, recommended, onPress }) => (
     <View style={[styles.planCard, { borderColor: color }]}>
         {recommended && (
             <View style={[styles.recommendedBadge, { backgroundColor: color }]}>
@@ -41,17 +42,29 @@ export default function PaymentScreen() {
     const [currentPlan, setCurrentPlan] = useState('Free');
     const [loading, setLoading] = useState(false);
 
-    const handleSub = async (planTitle)=>{
-             setLoading(true);
-             const success = await addToPremium(planTitle);
-             setLoading(false);
-             if(success) Alert.alert("Seucces", "User Added");
-             else
-                Alert.alert("Error", "User not Added");
+    useEffect(() => {
+        const checkStatus = async () => {
+            const status = await getPremiumStatus();
+            if (status) setCurrentPlan(status);
         }
-       
+        checkStatus();
+    }, []);
 
-    
+    const handleSub = async (planTitle) => {
+        setLoading(true);
+        const success = await addToPremium(planTitle);
+        setLoading(false);
+        if (success) {
+            Alert.alert("Success", "Congrats you have been added to premium ");
+            setCurrentPlan(planTitle);
+        }
+
+        else
+            Alert.alert("Error", "User not Added");
+    }
+
+
+
 
     const features = [
         "Ad-free music listening",
@@ -65,12 +78,12 @@ export default function PaymentScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                
+
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Premium Plans</Text>
                 </View>
 
-               
+
                 <View style={styles.heroSection}>
                     <Text style={styles.heroTitle}>Try Premium free for 1 month</Text>
                     <Text style={styles.heroSubtitle}>
@@ -78,15 +91,15 @@ export default function PaymentScreen() {
                     </Text>
                 </View>
 
-              
+
                 <View style={styles.currentPlanContainer}>
                     <Text style={styles.currentPlanLabel}>Current Plan:</Text>
                     <View style={styles.currentPlanBadge}>
-                        <Text style={styles.currentPlanText}>Musicaly Free</Text>
+                        <Text style={styles.currentPlanText}>{currentPlan}</Text>
                     </View>
                 </View>
 
-                
+
                 <View style={styles.featuresContainer}>
                     <Text style={styles.sectionTitle}>Why join Premium?</Text>
                     {features.map((item, index) => (
@@ -97,39 +110,39 @@ export default function PaymentScreen() {
                     ))}
                 </View>
 
-              
+
                 <View style={styles.plansContainer}>
                     <Text style={styles.sectionTitle}>Pick your Premium</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cardsScroll}>
                         <PlanCard
                             title="Personal"
                             price="$10.99"
-                            color="#FFD2D7" 
+                            color="#FFD2D7"
                             features={["1 Premium account", "Cancel anytime", "15 hours/month of listening time from our audiobooks subscriber catalog"]}
                             recommended={true}
-                            onPress={()=>handleSub("Personal")}
+                            onPress={() => handleSub("Personal")}
                         />
                         <PlanCard
                             title="Duo"
                             price="$14.99"
-                            color="#C4B1D4" 
+                            color="#C4B1D4"
                             features={["2 Premium accounts", "Cancel anytime", "15 hours/month of listening time from our audiobooks subscriber catalog"]}
-                            onPress={()=>handleSub("Duo")}
+                            onPress={() => handleSub("Duo")}
                         />
                         <PlanCard
                             title="Family"
                             price="$16.99"
-                            color="#A5C4F7" 
+                            color="#A5C4F7"
                             features={["Up to 6 Premium accounts", "Block explicit music", "Access to Spotify Kids"]}
-                             onPress={()=>handleSub("Family")}
+                            onPress={() => handleSub("Family")}
 
                         />
                         <PlanCard
                             title="Student"
                             price="$5.99"
-                            color="#E5C596" 
+                            color="#E5C596"
                             features={["1 verified Premium account", "Discount for eligible students", "Access to Hulu"]}
-                            onPress={()=>handleSub("Student")}
+                            onPress={() => handleSub("Student")}
 
                         />
                     </ScrollView>
