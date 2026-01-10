@@ -35,8 +35,27 @@ export function PlayerProvider({ children }) {
   }, []);
 
   /* ---------------- PLAY TRACK ---------------- */
-  async function playTrack(track, newQueue = []) {
-    if (!track?.preview) return;
+  async function playTrack(rawTrack, newQueue = []) {
+    console.log("playTrack called with:", JSON.stringify(rawTrack, null, 2));
+
+    if (!rawTrack?.preview) {
+      console.error("playTrack aborted: Missing preview URL", rawTrack);
+      return;
+    }
+
+    // Normalize track object
+    const track = {
+      ...rawTrack,
+      id: rawTrack.id,
+      title: rawTrack.title,
+      // Ensure artist is an object
+      artist: typeof rawTrack.artist === 'object' ? rawTrack.artist : { name: rawTrack.artist },
+      // Ensure cover is available at top level
+      cover: rawTrack.cover || rawTrack.album?.cover_medium || rawTrack.album?.cover_big || rawTrack.album?.cover_small,
+      preview: rawTrack.preview
+    };
+
+    console.log("Normalized track:", JSON.stringify(track, null, 2));
 
     // Stop previous sound
     if (soundRef.current) {

@@ -156,7 +156,7 @@ export default function PlaylistManager() {
             </View>
             <FlatList
                 data={selectedPlaylist?.songs || []}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item, index) => `${item.id}-${index}`}
                 ListEmptyComponent={<View style={styles.emptyState}>
                     <Text style={{ color: subText, textAlign: 'center' }}>No songs yet.</Text>
                     <Text style={{ color: subText, textAlign: 'center' }}>Tap + to add some vibes!</Text>

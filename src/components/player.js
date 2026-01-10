@@ -56,7 +56,7 @@ export default function PlayerScreen() {
     ? {
       title: currentTrack.title || "Unknown Title",
       artist: currentTrack.artist?.name || "Unknown Artist",
-      artwork: currentTrack.album?.cover_big || currentTrack.artist?.picture_big || null,
+      artwork: currentTrack.cover || currentTrack.album?.cover_big || currentTrack.artist?.picture_big || null,
       playlist: "Now Playing",
     }
     : {

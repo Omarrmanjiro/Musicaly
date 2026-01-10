@@ -23,6 +23,8 @@ export default function MiniPlayer() {
                     source={{
                         uri:
                             currentTrack.album?.cover_small ||
+                            currentTrack.cover ||
+                            currentTrack.album?.cover_small ||
                             currentTrack.artist?.picture_small,
                     }}
                     style={styles.cover}
