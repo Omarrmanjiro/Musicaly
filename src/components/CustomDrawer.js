@@ -1,13 +1,14 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '../../src/context/AuthContext';
 
 export default function CustomDrawer(props) {
     const insets = useSafeAreaInsets();
     const router = useRouter();
+    const { logout, user } = useAuth();
 
     return (
         <View style={{ flex: 1, backgroundColor: '#121212' }}>
@@ -17,9 +18,12 @@ export default function CustomDrawer(props) {
                     style={styles.header}
                     onPress={() => router.push('/(tabs)/profile')}
                 >
-                    <Image source={{ uri: 'https://i.pravatar.cc/300' }} style={styles.avatar} />
+                    <Image
+                        source={{ uri: user?.photoURL || 'https://i.pravatar.cc/300' }}
+                        style={styles.avatar}
+                    />
                     <View style={{ marginLeft: 15 }}>
-                        <Text style={styles.name}>Ouazzou abdelhamid</Text>
+                        <Text style={styles.name}>{user?.displayName || "User"}</Text>
                         <Text style={styles.viewProfile}>Voir le profil</Text>
                     </View>
                 </TouchableOpacity>
@@ -43,7 +47,7 @@ export default function CustomDrawer(props) {
 
             {/* LOGOUT */}
             <View style={{ padding: 20, borderTopWidth: 1, borderTopColor: '#333' }}>
-                <TouchableOpacity onPress={() => router.replace('/(auth)/login')} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity onPress={logout} style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="log-out-outline" size={22} color="white" />
                     <Text style={{ color: 'white', marginLeft: 15 }}>Se déconnecter</Text>
                 </TouchableOpacity>

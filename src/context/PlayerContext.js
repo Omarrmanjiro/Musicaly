@@ -106,12 +106,21 @@ export function PlayerProvider({ children }) {
   async function togglePlay() {
     if (!soundRef.current) return;
 
-    if (isPlaying) {
-      await soundRef.current.pauseAsync();
-    } else {
-      await soundRef.current.playAsync();
+    // OPTIMISTIC UPDATE: Flip state immediately for snappy UI
+    const shouldPlay = !isPlaying;
+    setIsPlaying(shouldPlay);
+
+    try {
+      if (shouldPlay) {
+        await soundRef.current.playAsync();
+      } else {
+        await soundRef.current.pauseAsync();
+      }
+    } catch (error) {
+      console.log("Error toggling play:", error);
+      // Revert if failed
+      setIsPlaying(!shouldPlay);
     }
-    setIsPlaying(p => !p);
   }
 
   async function seek(seconds) {

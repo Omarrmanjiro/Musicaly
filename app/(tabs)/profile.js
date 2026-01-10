@@ -1,21 +1,20 @@
+import { useEffect, useState } from "react"
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  SafeAreaView,
-  TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Image,
+  SafeAreaView,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native"
-import { useEffect, useState } from "react"
-import * as ImagePicker from "expo-image-picker"
 
-import { auth, db } from "../../src/config/firebase"
-import { onAuthStateChanged } from "firebase/auth"
+import { onAuthStateChanged, updateProfile } from "firebase/auth"
 import { doc, getDoc, setDoc } from "firebase/firestore"
+import { auth, db } from "../../src/config/firebase"
 // import { ref, uploadBytes, getDownloadURL } from "firebase/storage"  // Commented out since storage not available
 
 export default function ProfileScreen() {
@@ -40,15 +39,35 @@ export default function ProfileScreen() {
 
       setUser(u)
 
-      const refDoc = doc(db, "users", u.uid)
-      const snap = await getDoc(refDoc)
+      try {
+        const refDoc = doc(db, "users", u.uid)
+        const snap = await getDoc(refDoc)
 
-      if (snap.exists()) {
-        const data = snap.data()
-        setName(data.displayName || "")
-        setBio(data.bio || "")
-        setPhone(data.phone || "")
-        setPhotoURL(data.photoURL || null)
+        if (snap.exists()) {
+          const data = snap.data()
+          setName(data.displayName || "")
+          setBio(data.bio || "")
+          setPhone(data.phone || "")
+          setPhotoURL(data.photoURL || null)
+        } else {
+          // SELF-HEALING: If doc doesn't exist (e.g. registration race condition), create it now
+          console.log("Profile missing, creating default...");
+          const defaultData = {
+            displayName: "Music Lover",
+            email: u.email,
+            createdAt: new Date().toISOString(),
+            photoURL: null,
+            bio: "Ready to rock! 🎸",
+            phone: ""
+          };
+          await setDoc(refDoc, defaultData);
+          setName(defaultData.displayName);
+          setBio(defaultData.bio);
+          setPhone(defaultData.phone);
+        }
+      } catch (error) {
+        console.log("Error fetching profile:", error);
+        // Alert.alert("Error", "Could not fetch profile data. Permission denied?");
       }
 
       setLoading(false)
@@ -100,6 +119,14 @@ export default function ProfileScreen() {
 
       await setDoc(doc(db, "users", user.uid), data, { merge: true })
 
+      // SYNC AUTH PROFILE (For Drawer)
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, {
+          displayName: name,
+          photoURL: finalPhotoURL
+        });
+      }
+
       setEditing(false)
       Alert.alert("Saved", "Profile updated successfully")
     } catch (e) {
@@ -124,7 +151,7 @@ export default function ProfileScreen() {
               source={{
                 uri:
                   localImage ||
-                  photoURL 
+                  photoURL
               }}
               style={styles.avatar}
             />

@@ -1,5 +1,6 @@
+import { useRouter, useSegments } from "expo-router";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebase";
 
 const AuthContext = createContext(null);
@@ -27,11 +28,38 @@ export function AuthProvider({ children }) {
     return () => unsub();
   }, []);
 
+  // ROUTING PROTECTION
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!user && !inAuthGroup) {
+      // If not logged in and not in auth group, go to login
+      router.replace('/(auth)/login');
+    } else if (user && inAuthGroup) {
+      // If logged in and in auth group, go home
+      router.replace('/(tabs)');
+    }
+  }, [user, loading, segments]);
+
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error("Logout Error:", e);
+    }
+  };
+
   const value = {
     user,
     loading,
     error,
     isAuthenticated: !!user,
+    logout,
   };
 
   return (

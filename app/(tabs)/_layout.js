@@ -1,25 +1,33 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // We use Ionicons for consistent icons
+import { Platform, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { BottomTabBar } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import MiniPlayer from '../../src/components/MiniPlayer';
 
 export default function TabLayout() {
+    const insets = useSafeAreaInsets();
+
     return (
         <Tabs
+            tabBar={(props) => (
+                <View style={{ backgroundColor: '#121212' }}>
+                    <MiniPlayer />
+                    <BottomTabBar {...props} />
+                    {Platform.OS === 'android' && <View style={{ height: insets.bottom, backgroundColor: '#121212' }} />}
+                </View>
+            )}
             screenOptions={{
-                headerShown: false, // We hide the top header (Home Page has its own)
-
-                // 1. COLORS
-                tabBarActiveTintColor: '#ffffff', // White when selected
-                tabBarInactiveTintColor: '#b3b3b3', // Gray when not selected
-
-                // 2. THE BAR STYLE
+                headerShown: false,
+                tabBarActiveTintColor: '#ffffff',
+                tabBarInactiveTintColor: '#b3b3b3',
                 tabBarStyle: {
-                    backgroundColor: '#121212', // Dark background to match app
-                    borderTopWidth: 0, // Remove the ugly top line
-                    elevation: 0, // Remove shadow on Android
-                    height: Platform.OS === 'ios' ? 85 : 60, // Taller on iPhone for the home bar
-                    paddingBottom: Platform.OS === 'ios' ? 30 : 10, // Push icons up a bit
+                    backgroundColor: '#121212',
+                    borderTopWidth: 0,
+                    elevation: 0,
+                    height: Platform.OS === 'ios' ? 85 : 60,
+                    paddingBottom: Platform.OS === 'ios' ? 30 : 10,
                     paddingTop: 10,
                 },
             }}>
@@ -81,7 +89,7 @@ export default function TabLayout() {
                 name="profile"
                 options={{
                     title: 'Profile',
-                    href: null, // This hides it from the bottom tab bar
+                    href: null,
                 }}
             />
         </Tabs>

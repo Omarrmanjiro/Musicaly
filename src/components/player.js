@@ -2,7 +2,7 @@
 
 import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native"
 
-import { usePlayer } from "../../src/context/PlayerContext"
+import { usePlayer } from "../context/PlayerContext"
 import { LinearGradient } from "expo-linear-gradient"
 import Slider from "@react-native-community/slider"
 import { useEffect, useState } from "react"
