@@ -209,45 +209,66 @@ export default function PlaylistManager() {
 
     const renderBrowse = () => (
         <View style={{ flex: 1 }}>
-            <View>
+            <View style={styles.navHeader}>
                 <TouchableOpacity onPress={() => setCurrentView('detail')} style={{ padding: 10 }}>
                     <IconSymbol name="chevron.left" size={28} color={text} />
                 </TouchableOpacity>
+
+                {/* Now this will be centered because of 'justifyContent: space-between' */}
                 <Text style={[styles.navTitle, { color: text }]}>Add to "{selectedPlaylist?.name}"</Text>
-                <View style={{ width: 28 }} />
+
+                {/* Tip: Increase width to 48 to balance the back button exactly */}
+                <View style={{ width: 48 }} />
             </View>
             <FlatList
                 data={deezerTracks}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.songItem}>
-                        <TouchableOpacity
-                            style={{ flex: 1 }}
-                            onPress={() => {
-                                // Play the selected track
-                                const track = {
-                                    id: item.id,
-                                    title: item.title,
-                                    artist: item.artist,
-                                    cover: item.album.cover_medium,
-                                    preview: item.preview
-                                };
-                                setCurrentTrack(track);
-                                playTrack(track); // Just play this track
-                            }}
-                        >
-                            <Image source={{ uri: item.album.cover_medium }} style={styles.songImage} />
-                            <View style={{ flex: 1, marginLeft: 12 }}>
-                                <Text style={{ color: text, fontWeight: '600' }} numberOfLines={1}>{item.title}</Text>
-                                <Text style={{ color: subText }}>{item.artist.name}</Text>
-                            </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => SongToPlaylist(item)} style={{ padding: 10 }}>
-                            <IconSymbol name="plus.circle.fill" size={28} color="#1DB954" />
-                        </TouchableOpacity>
-                    </View>
-                )}
+                renderItem={({ item }) => {
+                    // 1. SAFER LOGIC: Check if song exists, defaulting to empty array [] if songs is missing
+                    const isAdded = (selectedPlaylist?.songs || []).some(
+                        savedSong => savedSong.id.toString() === item.id.toString()
+                    );
 
+                    return (
+                        <View style={styles.songItem}>
+                            <TouchableOpacity
+                                style={{ flex: 1 }}
+                                onPress={() => {
+                                    const track = {
+                                        id: item.id,
+                                        title: item.title,
+                                        artist: item.artist,
+                                        cover: item.album.cover_medium,
+                                        preview: item.preview
+                                    };
+                                    setCurrentTrack(track);
+                                    playTrack(track);
+                                }}
+                            >
+                                <Image source={{ uri: item.album.cover_medium }} style={styles.songImage} />
+                                <View style={{ flex: 1, marginLeft: 12 }}>
+                                    <Text style={{ color: text, fontWeight: '600' }} numberOfLines={1}>{item.title}</Text>
+                                    <Text style={{ color: subText }}>{item.artist.name}</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            {/* 2. ICON FIX: Try simple "checkmark" first. */}
+                            <TouchableOpacity
+                                onPress={() => !isAdded && SongToPlaylist(item)}
+                                disabled={isAdded}
+                                style={{ padding: 10 }}
+                            >
+                                <IconSymbol
+                                    // We use the name we just registered in Step 1
+                                    name={isAdded ? "checkmark.circle.fill" : "plus.circle.fill"}
+                                    size={28}
+                                    // Green for unchecked, Gray for checked
+                                    color={isAdded ? subText : "#1DB954"}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    );
+                }}
             />
 
         </View>

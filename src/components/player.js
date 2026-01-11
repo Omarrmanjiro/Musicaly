@@ -1,12 +1,13 @@
 "use client"
 
-import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native"
+import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions, Modal, FlatList, Alert, ActivityIndicator } from "react-native"
 
 import { usePlayer } from "../context/PlayerContext"
 import { LinearGradient } from "expo-linear-gradient"
 import Slider from "@react-native-community/slider"
 import { useEffect, useState } from "react"
 
+import { getUserPlaylists, addSongToPlaylist } from "../services/firebasePlaylist"
 const { width } = Dimensions.get("window")
 
 const trackColors = [
@@ -42,7 +43,30 @@ export default function PlayerScreen() {
 
   const [isSeeking, setIsSeeking] = useState(false)
   const [seekPosition, setSeekPosition] = useState(0)
+    // --- NEW CODE START ---
+    const [modalVisible, setModalVisible] = useState(false);
+    const [userPlaylists, setUserPlaylists] = useState([]);
+    const [loadingPlaylists, setLoadingPlaylists] = useState(false);
 
+    const openPlaylistModal = async () => {
+        if (!currentTrack) return;
+        setModalVisible(true);
+        setLoadingPlaylists(true);
+        const playlists = await getUserPlaylists();
+        setUserPlaylists(playlists);
+        setLoadingPlaylists(false);
+    };
+
+    const handleAddToPlaylist = async (playlistId) => {
+        try {
+            await addSongToPlaylist(playlistId, currentTrack);
+            Alert.alert("Success", "Song added to playlist! 🎵");
+            setModalVisible(false);
+        } catch (error) {
+            Alert.alert("Error", "Could not add song.");
+        }
+    };
+    // --- NEW CODE END ---
   useEffect(() => {
     if (!isSeeking) setSeekPosition(progress || 0)
   }, [progress, isSeeking])
@@ -164,10 +188,62 @@ export default function PlayerScreen() {
         <TouchableOpacity style={styles.bottomButton}>
           <Text style={styles.bottomActionIcon}>🔊</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomButton}>
-          <Text style={styles.bottomActionIcon}>📃</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton} onPress={openPlaylistModal}>
+              <Text style={styles.bottomActionIcon}>➕</Text>
+          </TouchableOpacity>
       </View>
+        {/* new code */}
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}
+        >
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Add to Playlist</Text>
+                    {loadingPlaylists ? (
+                        <ActivityIndicator size="large" color="#fff" />
+                    ) : (
+                        <FlatList
+                            data={userPlaylists}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => {
+                                // 1. CHECK: Is the current song already in this playlist?
+                                const isAdded = (item.songs || []).some(
+                                    savedSong => savedSong.id.toString() === currentTrack?.id.toString()
+                                );
+
+                                return (
+                                    <TouchableOpacity
+                                        style={styles.playlistItem}
+                                        // 2. DISABLE click if already added
+                                        onPress={() => !isAdded && handleAddToPlaylist(item.id)}
+                                        activeOpacity={isAdded ? 1 : 0.7} // Remove click effect if added
+                                    >
+                                        {/* 3. ICON: Change from Note (🎵) to Check (✅) */}
+                                        <Text style={styles.playlistIcon}>
+                                            {isAdded ? "✅" : "🎵"}
+                                        </Text>
+
+                                        {/* 4. TEXT: Dim the color if added */}
+                                        <Text style={[
+                                            styles.playlistName,
+                                            isAdded && { color: '#B3B3B3' } // Turn gray if added
+                                        ]}>
+                                            {item.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            }}
+                        />
+                    )}
+                    <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                        <Text style={styles.closeButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
     </LinearGradient>
   )
 }
@@ -289,4 +365,51 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "rgba(255,255,255,0.6)",
   },
+
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#222',
+        borderRadius: 20,
+        padding: 20,
+        maxHeight: '50%',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'white',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    playlistItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333',
+    },
+    playlistIcon: {
+        fontSize: 20,
+        marginRight: 15,
+    },
+    playlistName: {
+        color: 'white',
+        fontSize: 16,
+    },
+    closeButton: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: '#333',
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    closeButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    }
 })

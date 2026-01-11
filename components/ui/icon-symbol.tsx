@@ -24,7 +24,8 @@ const MAPPING = {
   'plus': 'add',                        
   'chevron.left': 'chevron-left',       
   'plus.magnifyingglass': 'search',     
-  'plus.circle.fill': 'add-circle',     
+  'plus.circle.fill': 'add-circle',
+    'checkmark.circle.fill': 'check-circle',
 } as IconMapping;
 
 export function IconSymbol({
