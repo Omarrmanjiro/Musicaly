@@ -13,7 +13,6 @@ export default function RootLayout() {
         <PlayerProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
 
-            {/* MAIN APP */}
             <Drawer
               drawerContent={(props) => <CustomDrawer {...props} />}
               screenOptions={{

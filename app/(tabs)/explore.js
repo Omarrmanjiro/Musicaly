@@ -67,13 +67,12 @@ export default function ExploreScreen() {
 
         return (
             <View style={styles.sectionContainer}>
-                {/* Title has padding so it aligns with search bar */}
+                
                 <Text style={styles.sectionTitle}>{title}</Text>
                 <FlatList
                     data={list}
                     horizontal={true} // <--- ENSURES SCROLLING SIDEWAYS
                     showsHorizontalScrollIndicator={false}
-                    // This padding allows the list to scroll "Edge to Edge"
                     contentContainerStyle={{ paddingHorizontal: 20 }}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
@@ -106,7 +105,6 @@ export default function ExploreScreen() {
     };
 
     return (
-        // REMOVED 'paddingHorizontal' from here so lists touch the edges
         <View style={styles.container}>
             <Text style={styles.header}>Search 🔍</Text>
 
@@ -197,23 +195,23 @@ export default function ExploreScreen() {
 }
 
 const styles = StyleSheet.create({
-    // REMOVED 'paddingHorizontal: 20' to fix scrolling
+    
     container: { flex: 1, backgroundColor: '#121212', paddingTop: 50 },
 
-    // Added margin here instead
+    
     header: { fontSize: 28, fontWeight: 'bold', color: 'white', marginBottom: 20, marginLeft: 20 },
 
-    // Added margin here instead
+    
     searchBox: {
         flexDirection: 'row', alignItems: 'center', backgroundColor: '#333',
         borderRadius: 10, paddingHorizontal: 15, height: 50, marginBottom: 20,
-        marginHorizontal: 20 // <--- Keeps the box centered
+        marginHorizontal: 20 
     },
     input: { flex: 1, color: 'white', fontSize: 16 },
 
     sectionContainer: { marginBottom: 30 },
 
-    // Added margin here instead
+    
     sectionTitle: { fontSize: 18, fontWeight: 'bold', color: 'white', marginBottom: 15, marginLeft: 20 },
 
     card: { marginRight: 15, width: 120 },

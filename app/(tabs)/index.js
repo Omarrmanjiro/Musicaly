@@ -15,7 +15,7 @@ import { usePlayer } from '../../src/context/PlayerContext';
 import { useNavigation, useRouter } from 'expo-router';
 import { DrawerActions } from '@react-navigation/native';
 
-/* ✅ MEMOIZED SECTION (VERY IMPORTANT) */
+/*  MEMOIZED SECTION (VERY IMPORTANT) */
 const Section = memo(({ title, list, onPress }) => (
     <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>{title}</Text>
@@ -54,7 +54,7 @@ export default function HomeScreen() {
     const [data, setData] = useState({ tracks: [], albums: [], playlists: [] });
     const [loading, setLoading] = useState(true);
 
-    const { playTrack } = usePlayer();      // action only
+    const { playTrack } = usePlayer(); 
 
     const router = useRouter();
     const navigation = useNavigation();
@@ -67,7 +67,7 @@ export default function HomeScreen() {
         })();
     }, []);
 
-    /* ✅ MEMOIZED PRESS HANDLER */
+    /* MEMOIZED PRESS HANDLER */
     const handlePress = useCallback((item) => {
         if (item.type === 'track') {
             playTrack(item);

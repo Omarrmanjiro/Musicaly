@@ -212,19 +212,14 @@ export default function PlaylistManager() {
             <View style={styles.navHeader}>
                 <TouchableOpacity onPress={() => setCurrentView('detail')} style={{ padding: 10 }}>
                     <IconSymbol name="chevron.left" size={28} color={text} />
-                </TouchableOpacity>
-
-                {/* Now this will be centered because of 'justifyContent: space-between' */}
+                </TouchableOpacity>    
                 <Text style={[styles.navTitle, { color: text }]}>Add to "{selectedPlaylist?.name}"</Text>
-
-                {/* Tip: Increase width to 48 to balance the back button exactly */}
                 <View style={{ width: 48 }} />
             </View>
             <FlatList
                 data={deezerTracks}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => {
-                    // 1. SAFER LOGIC: Check if song exists, defaulting to empty array [] if songs is missing
                     const isAdded = (selectedPlaylist?.songs || []).some(
                         savedSong => savedSong.id.toString() === item.id.toString()
                     );
@@ -252,17 +247,16 @@ export default function PlaylistManager() {
                                 </View>
                             </TouchableOpacity>
 
-                            {/* 2. ICON FIX: Try simple "checkmark" first. */}
                             <TouchableOpacity
                                 onPress={() => !isAdded && SongToPlaylist(item)}
                                 disabled={isAdded}
                                 style={{ padding: 10 }}
                             >
                                 <IconSymbol
-                                    // We use the name we just registered in Step 1
+
                                     name={isAdded ? "checkmark.circle.fill" : "plus.circle.fill"}
                                     size={28}
-                                    // Green for unchecked, Gray for checked
+
                                     color={isAdded ? subText : "#1DB954"}
                                 />
                             </TouchableOpacity>

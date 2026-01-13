@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert,Modal,ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { addToPremium, getPremiumStatus } from '../../src/services/premiumUsers';
@@ -78,7 +78,7 @@ export default function PaymentScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
-
+             
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Premium Plans</Text>
                 </View>
@@ -153,6 +153,12 @@ export default function PaymentScreen() {
                 </View>
 
             </ScrollView>
+             {loading && (
+                    <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="large" color="#1DB954" />
+                    <Text style={styles.loadingText}>Processing...</Text>
+                    </View>
+                )}
         </SafeAreaView>
     );
 }
@@ -244,7 +250,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#242424',
         borderRadius: 10,
         padding: 20,
-        width: SCREEN_WIDTH * 0.8, // 80% of screen width
+        width: SCREEN_WIDTH * 0.8, 
         minHeight: 350,
         borderTopWidth: 4,
         position: 'relative',
@@ -337,6 +343,23 @@ const styles = StyleSheet.create({
         color: '#535353',
         fontSize: 12,
         textAlign: 'center',
-    }
+    },
+    loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)', 
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000, 
+  },
+  loadingText: {
+    color: 'white',
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+  }
 
 });
